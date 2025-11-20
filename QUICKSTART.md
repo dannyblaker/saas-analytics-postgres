@@ -1,154 +1,155 @@
 # 🚀 Quick Start Guide
 
-Get up and running with SaaS analytics in 5 minutes!
+Get up and running with SaaS analytics in **2 minutes**!
 
-## Option 1: One-Command Setup (Recommended)
+## ⚡ One-Command Setup (Recommended)
 
 ```bash
-# Clone and setup everything
 git clone <your-repo-url>
 cd postgres_demo
-./setup_database.sh
+docker compose up
 ```
 
-This will:
-- ✅ Create PostgreSQL database with realistic sample data
-- ✅ Generate 1000+ users with 12 months of history  
-- ✅ Set up subscription plans (Free/Basic/Premium)
-- ✅ Create schema diagram visualization
+**That's it!** 🎉
 
-## Option 2: Docker Setup (Isolated)
+This single command starts:
+- ✅ PostgreSQL with 1000+ sample users and 12 months of data
+- ✅ Interactive Jupyter notebook with beautiful visualizations
+- ✅ All necessary analytics libraries pre-installed
 
+## 🌐 Access Your Analytics
+
+After `docker compose up` finishes (takes ~30 seconds):
+
+### 📊 Jupyter Notebook (Interactive Analytics)
+Open your browser to: **http://localhost:8888**
+
+You'll see an interactive notebook with:
+- Real-time visualizations of all SaaS metrics
+- MRR trends, churn analysis, conversion funnels
+- Geographic and channel performance
+- Customer lifetime value calculations
+
+### 🗄️ PostgreSQL Database (Direct SQL Access)
 ```bash
-# Start PostgreSQL in Docker
-docker-compose up -d
-
-# Database ready at localhost:5432
-# Optional: pgAdmin web interface at localhost:8080
+psql -h localhost -p 5432 -U saas_user -d saas_analytics_demo
+# Password: demo_password
 ```
 
-## Option 3: Manual Setup
-
+### 🔧 pgAdmin (Optional Web Interface)
 ```bash
-# 1. Create database
-createdb saas_analytics_demo
+docker compose --profile pgadmin up
+```
+Then visit: **http://localhost:8080**
 
-# 2. Load schema
-psql -d saas_analytics_demo -f schema.sql
+## 🎯 What You'll See
 
-# 3. Import sample data  
-psql -d saas_analytics_demo -f sample_data.sql
+The Jupyter notebook includes:
+1. **Key Metrics Dashboard** - Active users, MRR, conversion rates
+2. **Revenue Analytics** - MRR by plan, growth trends, ARR
+3. **Conversion Analysis** - Free-to-paid rates, time-to-upgrade
+4. **Retention & Churn** - Cohort analysis, churn rates by plan
+5. **Engagement Metrics** - User activation, feature adoption
+6. **Marketing Performance** - Channel attribution, geographic analysis
+7. **LTV Analysis** - Customer lifetime value by plan
+8. **Complete Funnel** - End-to-end conversion tracking
+
+## 💻 Run Your Own Queries
+
+Inside the Jupyter notebook or via psql:
+
+```python
+# In Jupyter - already connected!
+query = """
+    SELECT 
+        p.name as plan,
+        COUNT(s.id) as active_subscriptions,
+        SUM(s.mrr) as monthly_recurring_revenue
+    FROM subscriptions s
+    JOIN plans p ON s.plan_id = p.id
+    WHERE s.status = 'active'
+    GROUP BY p.name
+"""
+df = pd.read_sql(query, engine)
+df
 ```
 
-## 🔍 Start Analyzing
-
-### Connect to Database
-```bash
-psql -U saas_user -d saas_analytics_demo
-```
-
-### Run Sample Queries
 ```sql
--- Current MRR by plan
+-- In psql
 SELECT 
     p.name as plan,
+    COUNT(s.id) as active_subscriptions,
     SUM(s.mrr) as monthly_recurring_revenue
 FROM subscriptions s
 JOIN plans p ON s.plan_id = p.id
 WHERE s.status = 'active'
 GROUP BY p.name;
-
--- Free to paid conversion rate
-SELECT 
-    COUNT(CASE WHEN s.plan_id = 1 THEN 1 END) as free_users,
-    COUNT(CASE WHEN s.plan_id != 1 THEN 1 END) as paid_users,
-    ROUND(COUNT(CASE WHEN s.plan_id != 1 THEN 1 END) * 100.0 / COUNT(*), 2) as conversion_rate_pct
-FROM subscriptions s
-WHERE s.status = 'active';
 ```
 
-### Use Pre-built Analytics
-```bash
-# All analytics queries
-psql -d saas_analytics_demo -f analytics_queries.sql
+## 📁 Repository Structure
 
-# Quick dashboard
-python3 quick_dashboard.py
-```
-
-## 📊 Key Files
-
-| File | Purpose |
-|------|---------|
-| `schema.sql` | Complete database schema |
+| File/Folder | Purpose |
+|-------------|---------|
+| `docker-compose.yml` | One-command setup configuration |
+| `notebooks/` | Interactive Jupyter notebook with visualizations |
+| `schema.sql` | Complete PostgreSQL database schema |
+| `sample_data.sql` | Realistic sample data (1000+ users) |
 | `analytics_queries.sql` | 50+ analytical SQL queries |
-| `sample_data.sql` | Realistic sample data generation |
-| `schema_diagram.png` | Visual database structure |
 | `key_questions.md` | All analytics questions covered |
 
-## 🎯 Common Use Cases
+## 🛑 Stop Services
 
-### Revenue Analysis
-```sql
--- Monthly revenue trend
-SELECT 
-    DATE_TRUNC('month', re.occurred_at) as month,
-    SUM(re.amount) as revenue
-FROM revenue_events re
-WHERE re.event_type = 'payment'
-GROUP BY month
-ORDER BY month;
+```bash
+docker compose down
 ```
 
-### Churn Analysis  
-```sql
--- Churn rate by plan
-SELECT 
-    p.name,
-    COUNT(CASE WHEN s.status = 'cancelled' THEN 1 END) * 100.0 / COUNT(*) as churn_rate_pct
-FROM subscriptions s
-JOIN plans p ON s.plan_id = p.id
-WHERE s.plan_id != 1
-GROUP BY p.name;
-```
-
-### Funnel Analysis
-```sql
--- Conversion funnel
-SELECT 
-    COUNT(CASE WHEN fe.event_name = 'signup' THEN 1 END) as signups,
-    COUNT(CASE WHEN fe.event_name = 'onboarding_completed' THEN 1 END) as activated,
-    COUNT(CASE WHEN fe.event_name = 'subscription_created' THEN 1 END) as paid
-FROM funnel_events fe;
+To remove all data and start fresh:
+```bash
+docker compose down -v
 ```
 
 ## 🔧 Troubleshooting
 
-**Database connection failed?**
+**Port already in use?**
 ```bash
-# Check if PostgreSQL is running
-pg_isready
-
-# Restart if needed
-sudo systemctl restart postgresql
+# Change ports in docker-compose.yml
+# Jupyter: Change "8888:8888" to "8889:8888"
+# Postgres: Change "5432:5432" to "5433:5432"
 ```
 
-**Need to reset data?**
+**Container won't start?**
 ```bash
-./setup_database.sh --reset
+# Check logs
+docker compose logs postgres
+docker compose logs jupyter
 ```
 
-**Want to customize plans?**
-Edit the plans in `schema.sql` and re-run setup.
+**Need to rebuild after changes?**
+```bash
+docker compose up --build
+```
 
 ## 📚 Next Steps
 
-1. **Explore**: Browse `analytics_queries.sql` for more examples
-2. **Customize**: Modify `sample_data.sql` for your scenarios  
-3. **Extend**: Add your own tables and metrics
-4. **Visualize**: Connect to Tableau, PowerBI, or Grafana
-5. **Production**: Replace sample data with real customer data
+1. **📊 Explore the Notebook**: Open http://localhost:8888 and run all cells
+2. **🔍 Try Custom Queries**: Modify SQL in the notebook to explore data
+3. **📈 Export Visualizations**: Save charts from the notebook as PNG/HTML
+4. **🔧 Customize Data**: Edit `sample_data.sql` and rebuild
+5. **🚀 Production**: Replace sample data with your real customer data
+
+## 💡 Pro Tips
+
+- **Jupyter Tips**: 
+  - `Shift + Enter` to run a cell
+  - `Cell > Run All` to execute the entire notebook
+  - `File > Download as > HTML` to export results
+
+- **Quick Metrics**: The notebook auto-connects to the database, just run the cells!
+
+- **Custom Analysis**: Copy any cell and modify the SQL query for your specific questions
 
 ---
 
-**Need help?** Check the full `README.md` or open an issue!
+**🎉 You're now ready to explore SaaS analytics with PostgreSQL!**
+
+For more details, see the full `README.md` or browse the `analytics_queries.sql` file.

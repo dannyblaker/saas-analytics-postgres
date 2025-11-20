@@ -4,22 +4,56 @@
 
 This repository demonstrates the power of PostgreSQL for SaaS analytics by providing a realistic database schema, sample data, and comprehensive SQL queries that answer key growth questions for a project management SaaS application.
 
+**✨ What's New:** Now with **interactive Jupyter notebook** featuring beautiful visualizations! Run everything with a single `docker compose up` command.
+
 The SQL queries included in this project are inspired by a large scale real-world project I developed for an enterprise client.
 
 **You are most welcome to use this code in your commercial projects, all that I ask in return is that you credit my work by providing a link back to this repository. Thank you & Enjoy!**
 
+## ✨ Key Features
+
+- 🐳 **One-Command Setup** - `docker compose up` gets everything running
+- 📊 **Interactive Jupyter Notebook** - Visual analytics with Plotly charts
+- 🗄️ **Realistic Database** - 1000+ users, 12 months of behavioral data
+- 💰 **50+ SQL Queries** - All critical SaaS metrics covered
+- 📈 **Beautiful Visualizations** - MRR trends, cohort retention, conversion funnels
+- 🎯 **Production-Ready Schema** - Optimized indexes and relationships
+- 🌍 **Multi-dimensional Analysis** - Channel, geographic, and plan-based insights
+
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- PostgreSQL 12+ installed and running
-- Python 3.6+ (for ERD generation)
-- Graphviz (for schema diagrams)
+### One-Command Setup with Docker 🐳
 
-### One-Command Setup
+**The easiest way to get started:**
+
 ```bash
 git clone <your-repo-url>
 cd postgres_demo
+docker compose up
+```
+
+That's it! This single command will:
+- ✅ Start PostgreSQL with sample data (1000+ users, 12 months history)
+- ✅ Launch Jupyter notebook with interactive analytics
+- ✅ Set up all necessary Python libraries for visualization
+- ✅ Make everything accessible via your browser
+
+**Access the services:**
+- 📊 **Jupyter Notebook**: http://localhost:8888 (Interactive analytics dashboard)
+- 🗄️ **PostgreSQL**: localhost:5432 (Direct database access)
+- 🔧 **pgAdmin** (optional): `docker compose --profile pgadmin up` → http://localhost:8080
+
+### Prerequisites
+- Docker and Docker Compose installed
+- 2GB free disk space
+- Web browser
+
+### Alternative: Manual Setup
+
+If you prefer to install PostgreSQL locally:
+
+```bash
 ./setup_database.sh
 ```
 
@@ -73,6 +107,29 @@ Our schema models a realistic SaaS project management application with three sub
 - **🚀 Premium** - $19.99/month (unlimited projects and team members)
 
 ![Database Schema](readme_assets/schema_diagram_readme.png)
+
+## 📊 Interactive Jupyter Notebook
+
+**NEW!** All analytics queries are now available in an interactive, visual Jupyter notebook!
+
+After running `docker compose up`, open your browser to **http://localhost:8888** to access:
+
+- 📊 **Interactive visualizations** with Plotly and Matplotlib
+- 🔍 **Step-by-step analysis** of all key SaaS metrics
+- 📈 **Beautiful charts** for MRR, churn, conversion, and retention
+- 🎯 **Complete conversion funnels** with visual flow
+- 🌍 **Geographic and channel performance** analysis
+- 💡 **Customer Lifetime Value (LTV)** calculations
+
+The notebook (`notebooks/SaaS_Analytics_Demo.ipynb`) covers:
+1. Key Metrics Overview Dashboard
+2. Revenue & MRR Analytics  
+3. Conversion & Upgrade Analysis
+4. Retention & Churn Tracking
+5. Engagement & Activation Metrics
+6. Marketing Channel Performance
+7. Customer Lifetime Value
+8. Complete Conversion Funnel
 
 ## 📈 Analytics Capabilities
 

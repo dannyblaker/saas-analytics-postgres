@@ -1,0 +1,47 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!requirements.txt
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Generated files
+schema_diagram.*
+*.png
+*.svg
+*.dot
+
+# Logs
+*.log
+
+# Database files
+*.dump
+*.backup
+*.sql.gz
+
+# Jupyter checkpoints
+.ipynb_checkpoints/

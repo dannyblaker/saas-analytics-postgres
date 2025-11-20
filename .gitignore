@@ -63,8 +63,16 @@ logs/
 *.tmp
 *.temp
 
+# Jupyter notebooks
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
 # Node modules (if adding Node.js tools)
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Docker volumes
+postgres_data/
+pgadmin_data/

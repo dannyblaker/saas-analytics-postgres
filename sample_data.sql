@@ -23,19 +23,19 @@ SELECT
     END,
     -- User status distribution
     CASE 
-        WHEN random() < 0.15 THEN 'churned'
-        WHEN random() < 0.05 THEN 'inactive'
-        ELSE 'active'
+        WHEN random() < 0.15 THEN 'churned'::user_status
+        WHEN random() < 0.05 THEN 'inactive'::user_status
+        ELSE 'active'::user_status
     END,
     -- Signup channel distribution
     CASE 
-        WHEN random() < 0.3 THEN 'organic'
-        WHEN random() < 0.5 THEN 'google_ads'
-        WHEN random() < 0.65 THEN 'content'
-        WHEN random() < 0.75 THEN 'referral'
-        WHEN random() < 0.85 THEN 'facebook_ads'
-        WHEN random() < 0.95 THEN 'email_campaign'
-        ELSE 'direct'
+        WHEN random() < 0.3 THEN 'organic'::signup_channel
+        WHEN random() < 0.5 THEN 'google_ads'::signup_channel
+        WHEN random() < 0.65 THEN 'content'::signup_channel
+        WHEN random() < 0.75 THEN 'referral'::signup_channel
+        WHEN random() < 0.85 THEN 'facebook_ads'::signup_channel
+        WHEN random() < 0.95 THEN 'email_campaign'::signup_channel
+        ELSE 'direct'::signup_channel
     END,
     -- Country distribution (simplified)
     CASE 
@@ -71,8 +71,8 @@ INSERT INTO subscriptions (user_id, plan_id, status, billing_cycle, started_at, 
 SELECT 
     u.id,
     1, -- Free plan
-    'active',
-    'monthly',
+    'active'::subscription_status,
+    'monthly'::billing_cycle,
     u.created_at,
     0
 FROM users u;
@@ -89,33 +89,33 @@ WITH paid_upgrades AS (
         END as plan_id,
         -- Billing cycle preference
         CASE 
-            WHEN random() < 0.3 THEN 'annual'
-            ELSE 'monthly'
+            WHEN random() < 0.3 THEN 'annual'::billing_cycle
+            ELSE 'monthly'::billing_cycle
         END as billing_cycle,
         -- Upgrade timing (within 30 days of signup for most)
         u.created_at + (random() * INTERVAL '30 days') as upgrade_date
     FROM users u
     WHERE random() < 0.15 -- 15% upgrade rate
-    AND u.status != 'churned'
+    AND u.status != 'churned'::user_status
 )
 INSERT INTO subscriptions (user_id, plan_id, status, billing_cycle, started_at, mrr)
 SELECT 
     pu.user_id,
     pu.plan_id,
-    'active',
+    'active'::subscription_status,
     pu.billing_cycle,
     pu.upgrade_date,
     CASE 
-        WHEN pu.plan_id = 2 AND pu.billing_cycle = 'monthly' THEN 9.99
-        WHEN pu.plan_id = 2 AND pu.billing_cycle = 'annual' THEN 99.90
-        WHEN pu.plan_id = 3 AND pu.billing_cycle = 'monthly' THEN 19.99
-        WHEN pu.plan_id = 3 AND pu.billing_cycle = 'annual' THEN 199.90
+        WHEN pu.plan_id = 2 AND pu.billing_cycle = 'monthly'::billing_cycle THEN 9.99
+        WHEN pu.plan_id = 2 AND pu.billing_cycle = 'annual'::billing_cycle THEN 99.90
+        WHEN pu.plan_id = 3 AND pu.billing_cycle = 'monthly'::billing_cycle THEN 19.99
+        WHEN pu.plan_id = 3 AND pu.billing_cycle = 'annual'::billing_cycle THEN 199.90
     END
 FROM paid_upgrades pu;
 
 -- End free subscriptions for users who upgraded
 UPDATE subscriptions 
-SET status = 'cancelled', ended_at = s2.started_at
+SET status = 'cancelled'::subscription_status, ended_at = s2.started_at
 FROM subscriptions s2 
 WHERE subscriptions.user_id = s2.user_id 
 AND subscriptions.plan_id = 1 
@@ -124,7 +124,7 @@ AND subscriptions.id != s2.id;
 
 -- Create some churn (cancel some paid subscriptions)
 UPDATE subscriptions 
-SET status = 'cancelled', 
+SET status = 'cancelled'::subscription_status, 
     ended_at = started_at + (random() * INTERVAL '6 months'),
     cancelled_at = started_at + (random() * INTERVAL '6 months')
 WHERE plan_id != 1 
@@ -182,7 +182,7 @@ SELECT DISTINCT
 FROM projects p
 JOIN users u2 ON u2.id != p.user_id
 WHERE random() < 0.2 -- 20% of projects have team collaboration
-AND u2.status = 'active'
+AND u2.status = 'active'::user_status
 LIMIT 500; -- Limit to reasonable number
 
 -- Generate revenue events for paid subscriptions
@@ -197,7 +197,7 @@ SELECT
 FROM subscriptions s
 CROSS JOIN generate_series(0, 11) interval_month
 WHERE s.plan_id != 1 -- Not free plan
-AND s.status = 'active'
+AND s.status = 'active'::subscription_status
 AND s.started_at + (interval_month || ' months')::INTERVAL <= CURRENT_TIMESTAMP
 AND (s.ended_at IS NULL OR s.started_at + (interval_month || ' months')::INTERVAL <= s.ended_at);
 
@@ -241,15 +241,15 @@ WHERE s.plan_id != 1;
 
 -- Update user status based on activity
 UPDATE users 
-SET status = 'churned'
+SET status = 'churned'::user_status
 WHERE last_login_at < CURRENT_TIMESTAMP - INTERVAL '90 days'
-AND status = 'active';
+AND status = 'active'::user_status;
 
 UPDATE users 
-SET status = 'inactive'
+SET status = 'inactive'::user_status
 WHERE last_login_at < CURRENT_TIMESTAMP - INTERVAL '30 days'
 AND last_login_at >= CURRENT_TIMESTAMP - INTERVAL '90 days'
-AND status = 'active';
+AND status = 'active'::user_status;
 
 -- Create some plan upgrades/downgrades
 WITH plan_changes AS (

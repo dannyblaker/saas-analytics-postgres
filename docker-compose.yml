@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15-alpine
@@ -20,9 +18,32 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
+    networks:
+      - saas_network
 
-  # Optional: Add pgAdmin for web-based database management
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: saas_analytics_jupyter
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: saas_analytics_demo
+      POSTGRES_USER: saas_user
+      POSTGRES_PASSWORD: demo_password
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./notebooks:/home/jovyan/work
+      - ./schema.sql:/home/jovyan/work/schema.sql
+      - ./sample_data.sql:/home/jovyan/work/sample_data.sql
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - saas_network
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: saas_analytics_pgadmin
@@ -37,7 +58,8 @@ services:
         condition: service_healthy
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-    restart: unless-stopped
+    networks:
+      - saas_network
     profiles:
       - pgadmin
 
@@ -48,5 +70,5 @@ volumes:
     driver: local
 
 networks:
-  default:
-    name: saas_analytics_network
+  saas_network:
+    driver: bridge
